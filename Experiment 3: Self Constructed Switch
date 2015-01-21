@@ -1,0 +1,21 @@
+int connection = 7;
+int connectState = 0;
+
+void setup () {
+  
+  pinMode(connection, INPUT);
+  pinMode(13, OUTPUT);
+  
+}
+
+void loop () {
+  
+  connectState = digitalRead(7);
+  
+  if (connectState == HIGH) {
+   digitalWrite(13, HIGH); 
+  } else if (connectState == LOW) {
+   digitalWrite(13, LOW); 
+  }
+  
+}
