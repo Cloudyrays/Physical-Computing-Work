@@ -1,0 +1,48 @@
+int button = 7; //setting variables to represent pins
+int led = 8;
+
+int lastState = 0;   //lastState is for seeing if the button is being clicked rather than if it's continuing to be held down
+int blinkMode = 0;   //blinkMode is for controlling the blink rate and will be dependant on how many times the button has been clicked
+
+int buttonPush = 0;  //buttonPush will represent the switch input pin's current value
+
+int blinkRate = 200; //blinkRate will control the amount of delay between the LED being on and off
+
+void setup() {
+  
+   pinMode (button, INPUT); //setting pin modes
+   pinMode (led, OUTPUT);
+  
+}
+
+void loop() {
+  
+  //if button is HIGH when before it was LOW, and blinkMode is smaller than 2, add 1 to blinkMode
+  //if button is HIGH when before it was LOW, and blinkMode is 2, make blinkMode 0
+  
+  buttonPush = digitalRead(button); //buttonPush is now dependant on pin 7 input
+  
+  if (lastState == HIGH && buttonPush == LOW) {
+    if (blinkMode < 2) {
+      blinkMode = blinkMode + 1;
+    } else if (blinkMode == 2) {
+      blinkMode = 0;
+    }
+  } 
+
+  if (buttonPush == HIGH) { //changing lastState to remember current button state for next loop
+   lastState = 1; 
+  } else if (buttonPush == LOW) {
+   lastState = 0; 
+  } 
+  
+  blinkRate = (blinkMode*200 + 200); //making blinkRate dependant on blinkMode. BlinkRate will now either be 200, 400 or 600
+  
+  digitalWrite(led, HIGH);  //turn LED on
+  delay(blinkRate);         //wait a bit
+  digitalWrite(led, LOW);   //turn LED off
+  delay(blinkRate);         //wait a bit
+ 
+  delay(10);                //small delay to avoid running issues
+  
+}
