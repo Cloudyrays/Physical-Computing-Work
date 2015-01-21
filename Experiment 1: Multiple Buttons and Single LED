@@ -1,0 +1,42 @@
+int button0 = 5; //establishing variables
+int button1 = 6;
+int button2 = 7;
+
+int led = 8;
+
+void setup() {
+  
+  pinMode (button0, INPUT); //establishing pin modes
+  pinMode (button1, INPUT);
+  pinMode (button2, INPUT);
+  pinMode (led, OUTPUT);
+  
+}
+
+void loop() {
+  
+  if (digitalRead(button0) == HIGH) {   //if first button is pushed, make led blink accordingly
+    digitalWrite(led, HIGH);            //turn LED on
+    delay(500);                         //wait for it...
+    digitalWrite(led, LOW);             //turn it off
+    delay(500);                         //wait a bit...
+  }
+  if (digitalRead(button1) == HIGH) { //if second button is pushed, make led blink accordingly
+    digitalWrite(led, HIGH);
+    delay(800);
+    digitalWrite(led, LOW);
+    delay(200);
+  }
+  if (digitalRead(button2) == HIGH) { //if third button is pushed, make led blink accordingly
+    digitalWrite(led, HIGH);
+    delay(500);
+    digitalWrite(led, LOW);
+    delay(500);
+    digitalWrite(led, HIGH);
+    delay(200);
+    digitalWrite(led, LOW);
+    delay(200);
+  }
+  
+
+}
