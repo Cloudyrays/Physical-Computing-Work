@@ -1,18 +1,18 @@
-int connection = 7;
-int connectState = 0;
+int connection = 7;    //establishing variables (this variable is for the switch pin)
+int connectState = 0;  //(this variable is for the reading the switch pin)
 
 void setup () {
   
-  pinMode(connection, INPUT);
-  pinMode(13, OUTPUT);
+  pinMode(connection, INPUT);  //setting pin modes
+  pinMode(13, OUTPUT);         //pin 13 is already wired and will be used to test the switch
   
 }
 
 void loop () {
   
-  connectState = digitalRead(7);
+  connectState = digitalRead(7);  //connectState is now dependant on the switch pin input
   
-  if (connectState == HIGH) {
+  if (connectState == HIGH) { //controlling the LED with connectState
    digitalWrite(13, HIGH); 
   } else if (connectState == LOW) {
    digitalWrite(13, LOW); 
