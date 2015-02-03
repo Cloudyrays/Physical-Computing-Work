@@ -1,0 +1,49 @@
+/*
+Mechanical Movement (Lab 4, part 2)
+Sophia Niergarth
+Physical Computing
+OCAD University
+Created on 2 February 2015
+
+Based on:
+Sweep, BARRAGAN, http://arduino.cc/en/Tutorial/sweep
+
+*/
+
+#include <Servo.h>
+
+Servo myservo;
+
+int pos = 0;
+
+void setup () {
+  myservo.attach(9);
+}
+
+void loop () {
+  for(pos = 0; pos < 45; pos += 1)
+  {
+   myservo.write(pos);
+   delay(10); 
+  }
+  for(pos = 45; pos < 90; pos += 1)
+  {
+   myservo.write(pos);
+   delay(20); 
+  }
+  for(pos = 90; pos < 135; pos += 1)
+  {
+   myservo.write(pos);
+   delay(30); 
+  }
+  for(pos = 135; pos < 180; pos += 1)
+  {
+   myservo.write(pos);
+   delay(40); 
+  }
+  for(pos = 180; pos>=1; pos-=1)
+  {
+   myservo.write(pos);
+    delay(5); 
+  }
+}
