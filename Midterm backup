@@ -69,22 +69,14 @@ void setup () {
 
 void loop () {
 
-  push1 = digitalRead(buttonPin1);
+  push1 = digitalRead(buttonPin1);         //making push1-push3 dependant on the button input
   push2 = digitalRead(buttonPin2);
   push3 = digitalRead(buttonPin3);
-  /*if(push1 == HIGH) {
-   setColour(255, 0, 0);
-   }else if (push2 == HIGH) {
-   setColour(0, 255, 0);
-   }else if (push3 == HIGH) {
-   setColour(0, 0, 255);
-   }
-   */
 
-  int potInput = analogRead(potPin);
+  int potInput = analogRead(potPin);       //making potInput dependant on potentionmeter input
 
 
-  if (potInput < 200) {                    //assigning potSections to ranges on the potInput
+  if (potInput < 200) {                    //assigning potSections to 4 ranges of the potentiometer input
     potSection = 0; 
   }
   else if (potInput >= 200 && potInput <500) {
@@ -98,7 +90,7 @@ void loop () {
   }
 
 
-                                //giving the system tasks depending on current potSection
+ //giving the system tasks depending on current potSection:
   if (potSection == 0) {
     inputMode();
   }
@@ -117,7 +109,7 @@ void loop () {
 
   serialTesting();
 
-  int lastPotSection = potSection;
+  int lastPotSection = potSection;      //making lastPotSection remember what potSection was in the last cycle
   delay(10);
 
 } 
@@ -127,7 +119,7 @@ void clue ()
   codeTracker = 0;
   if (locked == true) {
   
-  //correspond buttons to colours, blink LED 
+                                     //correspond buttons to colours, blink LED 
   for(int i = 0; i < 7; i ++) {
    if(passCode[i] == 1) {
      setColour(80, 0, 80);
@@ -142,23 +134,23 @@ void clue ()
   setColour(0, 0, 0);
   delay(200);
   }
-  setColour(0, 0, 0); //take a big pause between clue patterns
+  setColour(0, 0, 0);               //take a big pause between clue patterns
   delay(1000); 
   }
 }
 
 void inputMode () {
 if (locked == true) { 
-     if (potSection != lastPotSection) { //just switched to this mode? Then when you start entering the code, start from the beginning
+     if (potSection != lastPotSection) {            //just switched to this mode? Then when you start entering the code, restart checking process
       codeTracker = 0; 
       stillOk = true;
      }
           
-     if (codeTracker < 6) { //if the code hasn't been completely entered 
-         if (push1 == HIGH && lastState1 == LOW) {
-           currentCodeInput[codeTracker] = 1;
-           tone(9, NOTE_C3, 200);
-           codeTracker ++;
+     if (codeTracker < 6) {                               //if the code hasn't been completely entered, continue to register button input 
+         if (push1 == HIGH && lastState1 == LOW) {        //1 button press = 1 input (so holding down the button doesn't do anything)
+           currentCodeInput[codeTracker] = 1;             //remember the input
+           tone(9, NOTE_C3, 200);                         //sound feedback
+           codeTracker ++;                                //remember that another input has been added
          }else if (push2 == HIGH && lastState2 == LOW) {
            currentCodeInput[codeTracker] = 2;
            tone(9, NOTE_D3, 200);
@@ -169,56 +161,56 @@ if (locked == true) {
            codeTracker ++;
          }
          
-           lastState1 = push1;
+           lastState1 = push1;                             //remember last state of button
            lastState2 = push2;
            lastState3 = push3;
      }
 
      
-     if (codeTracker == 6) {   //if there have been 6 button pushes...
+     if (codeTracker == 6) {                               //after there have been 6 button pushes...
        for (int i = 0; i < 6; i++) {
-        if (currentCodeInput[i] != passCode[i]) {
-         stillOk = false; 
+        if (currentCodeInput[i] != passCode[i]) {      
+         stillOk = false;                                  //if any of the codes don't match up, the system remains locked
         }
        }
        
-       if (stillOk == true) {
+       if (stillOk == true) {                             //if the input and passcode match, unlock the system, flash green
           locked = false;
-          setColour(0, 255, 0); //blinking green shows you've input the right code
+          setColour(0, 255, 0);                           //blinking green shows you've input the right code
           delay (300);
           setColour(0, 0, 0);
           delay(300);
           setColour(0, 255, 0);
           delay(300);
           setColour(0, 0, 0);
-          openSong();
-          codeTracker = 0;
+          openSong();                                    //play a small song
+          codeTracker = 0;                               //reset checking system
           
        } else if (stillOk == false) {
-        setColour(255, 0, 0); //blinking red shows you've input the wrong code
+        setColour(255, 0, 0);                            //blinking red shows you've input the wrong code
         delay (300);
         setColour(0, 0, 0);
         delay(300);
         setColour(255, 0, 0);
         delay(300);
         setColour(0, 0, 0);
-        codeTracker = 0;
-        stillOk = true;
+        codeTracker = 0;                                //reset checking system
+        stillOk = true;       
        }
      }
 
     }
    } 
 
-void lock () {
+void lock () {                                         //this occurs when the user turns the potentiometer into lock mode
   codeTracker = 0;
-  if (locked == false) { //the following only happens when the lock is locked and not repeatedly after
+  if (locked == false) {                               //the following only happens when the lock is locked and not repeatedly after
     lockSong();
   }
   locked = true;
 }
 
-/*************************************************
+/*************************************************     //this is to make coding the songs easier
  * Public Constants
  *************************************************/
 
@@ -312,7 +304,7 @@ void lock () {
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
 
-void serialTesting () {
+void serialTesting () {                   //this function is only for testing
  
   Serial.println("currentCodeInput:");
   for(int i = 0; i < 6; i++) {
@@ -327,20 +319,15 @@ void serialTesting () {
   delay(100);
   
   //Serial.println(stillOk);
-  
   //Serial.println(potSection);   //used this to verify things
   //0-100(top left), 200-400(bottom left), 600-800 (bottom right), 900-1023(top right) 
   
 }
 
-void codeSetMode() {
-if (locked == false) { //you must have unlocked the code to do this
-     if (potSection != lastPotSection) {
-      // codeTracker = 0;
-      delay(10);
-     }
+void codeSetMode() {      
+if (locked == false) {                                //you must have unlocked the code to set a new code
      
-     if (codeTracker < 6) { //if the code hasn't been completely entered 
+     if (codeTracker < 6) {                           //if the code hasn't been completely entered 
      
       if (push1 == HIGH && lastState1 == LOW) {
            currentCodeInput[codeTracker] = 1;
@@ -358,12 +345,12 @@ if (locked == false) { //you must have unlocked the code to do this
       lastState3 = push3;
      
 
-     if (codeTracker == 6) { //if you've made 6 pushes
-       for (int i = 0; i < 6; i++) { //set the new passcode to equal the one just entered
+     if (codeTracker == 6) {                  //if you've made 6 pushes
+       for (int i = 0; i < 6; i++) {          //set the new passcode to equal the one just entered
         passCode[i] = currentCodeInput[i]; 
        }
        
-      setColour(255, 100, 0); //shows you've just changed the code
+      setColour(255, 100, 0);                 //the colours show that you've just changed the code
       delay (300);
       setColour(0, 0, 0);
       delay (300);
@@ -371,18 +358,15 @@ if (locked == false) { //you must have unlocked the code to do this
       delay(300);
       setColour(0, 0, 0);
       
-      locked = true;
-       
-      //codeTracker = 0;
-     
+      locked = true;                          //entering a new code also locks the system
     }
    }
   }
 }
 
-void setColour(int red, int green, int blue) //translating RGB code into info for each of the LED pins
+void setColour(int red, int green, int blue) //translating RGB code into info for each of the LED pins. This function is from Adafruit
 {
-    red = 255 - red;                        //LED is common anode, so this is necessairy
+    red = 255 - red;                         //LED is common anode, so this is necessairy
     green = 255 - green;
     blue = 255 - blue;
   analogWrite(redPin, red);
@@ -390,7 +374,7 @@ void setColour(int red, int green, int blue) //translating RGB code into info fo
   analogWrite(bluePin, blue);  
 }
 
-void openSong () {
+void openSong () {                 //this song plays when the system is unlocked
   
     int melody[] = {
       NOTE_C2, NOTE_E3, NOTE_G3, NOTE_C4, NOTE_G3, NOTE_E3, NOTE_C2
@@ -411,7 +395,7 @@ void openSong () {
   }
 }
 
-void lockSong () {
+void lockSong () {         //when the potentionmeter is turned to lock mode, play a song and change the LED
   
   int melody[] = {
       NOTE_C2, NOTE_D3, NOTE_E3, 0, NOTE_E3, NOTE_F3, NOTE_G3, 0, NOTE_G3, NOTE_F3, NOTE_E3, 0, NOTE_E3, NOTE_D4, NOTE_C4
@@ -424,7 +408,7 @@ void lockSong () {
   int notes = 15;
   
   for (int thisNote = 0; thisNote < notes; thisNote++) {
-      if(thisNote < 8){ //make LED transition from green to red with the song
+      if(thisNote < 8){                                     //make LED transition from green to red with the song
       setColour(0, 255, 0);  
       } else {
       setColour(255, 255-(thisNote*36),0); 
