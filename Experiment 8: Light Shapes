@@ -6,7 +6,7 @@ OCAD University
 Created on 3 March 2015
 
 Based on:
-Serial Call Response, Tom Igoe and Scott Fitzgerald, http://arduino.cc/en/Tutorial/SerialCallResponse
+Serial Call Response, Tom Igoe, http://arduino.cc/en/Tutorial/SerialCallResponse
 */
 
 int LDR;
