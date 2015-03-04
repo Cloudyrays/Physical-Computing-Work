@@ -1,0 +1,44 @@
+ /*
+Drag Ball - Processing (Lab 5, part 1)
+Sophia Niergarth
+Physical Computing
+OCAD University
+Created on 3 March 2015
+
+Based on:
+Dimmer, David A. Mellis, http://arduino.cc/en/Tutorial/Dimmer
+
+*/
+  
+ import processing.serial.*;
+ Serial port;
+  
+ void setup () {
+   
+   size(256, 256);  //set canvas size
+   
+   //println("Available serial ports:");
+   //println(Serial.list());
+   
+   port = new Serial(this, Serial.list()[4], 9600);
+   
+ }
+ 
+ void draw () {
+   background(255, 255-mouseX, 100, 10);              //make background change colour depending on horizontal mouse location
+   
+   fill(0);
+   stroke(255, mouseX, 100);                          //make ellipse outline colour dependant on mouseX
+   strokeWeight(map(mouseX, 0, width, 0, 40));        //make ellipse outline thickness dependant on mouseX
+   rotate(radians(map(mouseX, 0, width, 0, 90)));     //rotate ellipse from 0 to 90 degrees depending on mouseX
+   ellipse(width, 50, 30, 30);                        //draw ellipse
+   
+   fill(255);                                         //same thing, just more ellipses and slightly different behaviours
+   stroke(100, 256-mouseX, mouseX);
+   strokeWeight(map(mouseX, 0, width, 40, 0));
+   ellipse(100, 100, 10, 10);
+   ellipse(30, 30, 20, 20);
+   
+   port.write(mouseX);                                 //send mouseX data to serial port
+   
+ }
