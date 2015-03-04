@@ -1,0 +1,64 @@
+ /*
+Light Shapes - Processing (Lab 5, part 2)
+Sophia Niergarth
+Physical Computing
+OCAD University
+Created on 3 March 2015
+
+Based on:
+Serial Call Response, Tom Igoe , http://arduino.cc/en/Tutorial/SerialCallResponse
+
+*/
+
+import processing.serial.*;
+
+Serial myPort;           
+boolean firstContact = false;
+
+float LDRInput;
+int mappedLDR;
+
+void setup() {
+  size(256, 256); 
+
+  //println(Serial.list());  
+  String portName = Serial.list()[4];
+  myPort = new Serial(this, portName, 9600);
+  
+  stroke(255);                                          //set outline colour to white
+}
+
+void draw() {
+  mappedLDR = int(abs(map(LDRInput, 0, 50, 0, 255)));   //mapping LDR input for easier use
+  println(LDRInput);
+  
+  background(mappedLDR, 100, 100, 10);                  //draw background and make colour dependant on mapped LDR input
+  
+  strokeWeight(abs(map(LDRInput, 0, 50, 1, 10)));       //make outline thickness dependant on mapped LDR input
+  fill(200, 200, mappedLDR, 100);                       //make fill colour dependant on mapped LDR input
+  rect(width/2, height/2, 100, 100);                    //draw rectangle
+  
+  fill(255, 20);                                        //change fill colour to translucent white
+  strokeWeight(abs(map(LDRInput, 0, 50, 10, 1)));       //same outline behaviour as above but reversed
+  ellipse(width/4, height/4, 30, 30);                   //draw ellipse
+ 
+
+}
+
+void serialEvent(Serial myPort) {
+  int inByte = myPort.read();
+
+  if (firstContact == false) {
+    if (inByte == 'A') {  
+      myPort.clear();                                  // clear the serial port buffer
+      firstContact = true;                             // you've had first contact from the microcontroller
+      myPort.write('A');                               // ask for more
+    } 
+  } 
+  else {
+    LDRInput = inByte;
+                                                       // Send a capital A to request new sensor readings:
+      myPort.write('A');
+    
+  }
+}
