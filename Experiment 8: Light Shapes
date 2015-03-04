@@ -1,0 +1,38 @@
+/*
+Light Shapes (Lab 5, part 2)
+Sophia Niergarth
+Physical Computing
+OCAD University
+Created on 3 March 2015
+
+Based on:
+Serial Call Response, Tom Igoe and Scott Fitzgerald, http://arduino.cc/en/Tutorial/SerialCallResponse
+*/
+
+int LDR;
+int inByte = 0;      
+
+void setup()
+{
+  
+  Serial.begin(9600);
+
+  while (Serial.available() <= 0) {
+    Serial.print('A');                     // send a capital A to establish contact with Processing
+    delay(300);
+  }
+
+
+}
+
+void loop()
+{
+  if (Serial.available() > 0) {
+    inByte = Serial.read();
+    int LDRRead = analogRead(A0);          //get LDR data and put it into a variable
+    LDR = map(LDRRead, 0, 200, 0, 255);    //map LDR data
+    
+    delay(10);
+    Serial.write(LDR);                     //send the mapped LDR input to Processing           
+  }
+}
