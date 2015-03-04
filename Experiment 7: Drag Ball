@@ -1,0 +1,35 @@
+/*
+Drag Ball (Lab 5, part 1)
+Sophia Niergarth
+Physical Computing
+OCAD University
+Created on 3 March 2015
+
+Based on:
+Knob, Michal Rinott, http://arduino.cc/en/Tutorial/knob
+Dimmer, David A. Mellis, http://arduino.cc/en/Tutorial/Dimmer
+*/
+
+#include <Servo.h>
+Servo myservo;
+
+int mapped;                                          //store the mapped value sent from Processing
+
+void setup()
+{
+                                                     // initialize the serial communication:
+  Serial.begin(9600);
+  myservo.attach(9);
+}
+
+void loop() {
+  byte processingInput;
+
+                                                     // check if data has been sent from the computer:
+  if (Serial.available()) {
+    processingInput = Serial.read();
+    mapped = map(processingInput, 0, 255, 90 , 0);   //map the processing input from 0 to 90 degrees
+    myservo.write(mapped);                           //send the mapped values to the servo
+    delay(15); 
+  }
+}
