@@ -1,0 +1,51 @@
+float a = 0;
+//above controls horizontal movement of DNA
+float b = 0;
+//above is for vertical movement of DNA
+float speed = 2;
+float c = 0;
+//above is for vertical movement of DNA
+color blended = color(110, 74, 188);
+color randColor = color(232, 114, 35);
+//right now, the above color is orange. Change this colour and all the other colours will be affected
+float blendiness = 0.8;
+//above controls some of the randomness of the colour generation
+
+void setup () {
+  size(600,600);
+  noStroke();
+  background(255);
+  
+  for (int i = 0; i < 7; i++) {
+    blended = blendColor(blended, randColor, BLEND);
+    randColor = color((random(255)*(1-blendiness))+(red(blended)*blendiness), (random(255)*(1-blendiness))+(green(blended)*blendiness), (random(255)*(1-blendiness))+(blue(blended)*blendiness));
+    fill(blended);
+    rect(0, i*50, 600, 50);
+    //these rectangles make up the sky
+  }
+}
+
+void draw () {
+  
+  fill(255, 5);
+  rect(0, 300, width, height/2);
+  //above translucent rectangle creates the fadey effect for the DNA
+  fill (blended);
+  ellipse(a - 50, b + 200, 25, 25);
+  fill (randColor);
+  ellipse(a + 50, b + 200, 25, 25);
+  //above ellipses make up the DNA
+  
+  a = a+speed;
+  b = 100 + (100 * sin(c));
+  c = c+(PI/100); 
+  //above effects the DNA movement
+  
+  if (a >= width) {
+     speed = speed*(-1);
+  }
+  if (a <= 0) {
+     speed = speed*(-1);
+  }
+  //above effects the sharp turns of the DNA, which makes it look kind of like a celtic knot
+}
