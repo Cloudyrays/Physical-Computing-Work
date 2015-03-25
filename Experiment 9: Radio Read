@@ -1,0 +1,60 @@
+ /*
+Radio Read - Processing (Lab 6)
+Sophia Niergarth
+Physical Computing
+OCAD University
+Created on 23 March 2015
+
+Based on:
+Read, Tom Igoe , https://processing.org/reference/libraries/serial/Serial_read_.html
+Sine Wave, Sophia Niergarth, 
+
+*/
+
+import processing.serial.*;
+Serial myPort;
+
+float a;            //the following 3 variables will control the displacement of the circles
+float b;
+float c;
+float speed = 2;    //affects the "horizontal" velocity of the circles
+
+
+void setup() {
+  println(Serial.list());
+  size(600, 600);
+  //myPort = new Serial(this, Serial.list()[4], 9600);
+  
+  noStroke();
+}
+
+void draw() {
+  
+  while (myPort.available() > 0) {
+    int inByte = myPort.read();      //get serial port data
+    println(inByte);
+  }
+  
+  fill(200, 100, 100, 5);
+  rect(0, 0, width, height);
+  
+  fill(200, 100, 100);
+  rotate(radians(map(inByte, 300, 700, 0, 90)));
+  ellipse(a, b+200, 50, 50);
+  
+  fill(255);
+  rotate(radians(map(inByte, 300, 700, 90, 0)));
+  ellipse(a, b+200, 20, 20);
+  
+  a = a+speed;                 //controls horizontal motion
+  b = 100 + (200 * sin(c));    //controls vertical motion
+  c = c+(PI/10);               //controls wave
+  
+  if (a >= width) {
+     speed = speed*(-1);       //if ball goes to far, turn back
+  }
+  if (a <= 0) {
+     speed = speed*(-1);       //if ball returns, turn back
+  }
+  
+}
