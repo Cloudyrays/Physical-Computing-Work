@@ -12,80 +12,95 @@ Process Hack for Firmata, Paul Badger, http://playground.arduino.cc/Interfacing/
 */
 
 PFont font = createFont("Arial", 16, true);
-boolean clicked = false;
-int mode;
-int timer;
-int timer2;
-boolean changeModeSoon = false;
 
-int inhaleClickTime;
-int maxInhale;
-int exhaleClickTime;
-int minExhale;
+boolean clicked = false;                         //for bug purposes
+int mode;                                        //this will control the different modes of the program
+int timer;                                       //records time for looping visuals
+int timer2;                                      //this was going to be used to delay changing modes
+boolean changeModeSoon = false;                  //same as above
 
-import arb.soundcipher.*;
-SoundCipher sc = new SoundCipher(this);
+int inhaleClickTime;                             //acts as a counter so that the callibration inhale input is only recorded at certain points
+int maxInhale;                                   //will contain the user's maximum stretch input for callibration
+int exhaleClickTime;                             //acts as a counter like the one above
+int minExhale;                                   //will contain the user's minimum stretch input for callibration
+
+import arb.soundcipher.*;                        //SoundCipher library
+SoundCipher sc = new SoundCipher(this);          //each of these allow me to control musical notes more seperately
 SoundCipher sc2 = new SoundCipher(this);
 SoundCipher sc3 = new SoundCipher(this);
 SoundCipher sc4 = new SoundCipher(this);
 
-int baseNote;
-int noteMod = 0;
+int baseNote;                                    //the base notes will be affected by breathing data and will have dependant notes that can be heard after the base note is played
+int noteMod = 0;                                 //this controls how harmonous the dependant notes will be in relation to the base notes
 
-int rand1 = 5;
+int rand1 = 5;                                   //these two variables control the likelyness that certain notes and pauses will be skipped over. Increasing rand2 will decrease the likeliness of harmonic chord progressions 
 int rand2 = 0;
 
 //% of random = rand2 / rand1
 
-import processing.serial.*;
+import processing.serial.*;                      //this sketch will receive data from Arduino, which will be using the Firmata library
 import cc.arduino.*;
 Arduino arduino;
 
-float stretch1;
+float stretch1;                                  //these will contain analog data from two stretch sensors
+float stretch2;
+
+int a2 = 360;                                    //manual callibration for the second sensor for testing
+int b2 = 470;
+
 
 void setup () {
   size(600, 600);
   noStroke();
   
   arduino = new Arduino(this, Arduino.list()[4], 57600);
-  
-  arduino.pinMode(0, Arduino.INPUT);
 }
 
 void draw () {
   
   stretch1 = arduino.analogRead(0);
-  println(stretch1);
-  baseNote = int(map(mouseX, 0, 600, 40, 70));
+  stretch2 = arduino.analogRead(1);
+  
+  //println(stretch2);
+  baseNote = int(map(stretch1, minExhale, maxInhale, 40, 70));        //make the base notes dependant on the callibrated breathing sensor data
+  noteMod = int(map(stretch2, a2, b2, 0, 1));                         //make the dependant notes dependant on the callibrated data from the other stretch sensor
+  rand2 = int(map(stretch2, a2, b2, 0, 4));                           //make the likeliness of note skipping dependant on the same data
+  
     
-  if (mode == 0) {
+  if (mode == 0) {                                                    //change the modes according to the value of the mode variable
     startMode();
   }
   if (mode == 1) {
     callibration();
   }
   if (mode == 2) {
-    excersize();
+    exercise();
   }
   
+  if (timer < 120) {                                                                         //120 ticks is the amount of time for the visualized data to reach the end of the screen
+    timer++;
+  } else {
+    timer = 0;
+    
+  }
   
 }
 
 void mouseClicked () {
-  if (mouseX > 100 && mouseX < 500 && mouseY > 200 && mouseY < 400) {
+  if (mouseX > 100 && mouseX < 500 && mouseY > 200 && mouseY < 400) {        //if the mouse is close enough to the text, you can click it to enter callibration mode
     clicked = true;
     mode = 1;
   }
   
-  if (mode == 1 && inhaleClickTime == 0) {
+  if (mode == 1 && inhaleClickTime == 0) {                                  //this is so the inhale data is only recorded on the second click, when the program is actually ready for it
     inhaleClickTime ++;
   } else if (mode == 1 && inhaleClickTime == 1) {
-    println("yes");
+    //println("yes");
     inhaleClickTime = 2;
-    maxInhale = int(stretch1);
+    maxInhale = int(stretch1);                                              //record the maximum stretch data from the user for callibration
     println(maxInhale);
   }
-  if (mode == 1 && inhaleClickTime == 2 && exhaleClickTime == 0) {
+  if (mode == 1 && inhaleClickTime == 2 && exhaleClickTime == 0) {          //this stuff is basically the same as above, but for the minimum stretch data
     exhaleClickTime ++;
   } else if (mode == 1 && exhaleClickTime == 1) {
     exhaleClickTime = 2;
@@ -93,59 +108,46 @@ void mouseClicked () {
     println("max is" + minExhale);
   }
   
-  if (mode == 1 && exhaleClickTime == 2 && maxInhale < minExhale) {
-    changeModeSoon = true;
-    //mode = 2;
+  if (mode == 1 && exhaleClickTime == 2 && maxInhale < minExhale) {        //if the min and max data are actually useable, enter the next mode
+      mode = 2; 
+     fill(255);
+     rect(width/2, height/2, width, height);
   }
-  
-  if (changeModeSoon == true) {
-   mode = 2; 
-  }
-  
-}
 
-void callibration () {
+  //next page
   
-  //background(255,10);
+  void callibration () {
+  
   fill(255, 10);
-  rect(width/2, height/2, width, height);
+  rect(width/2, height/2, width, height);                                                    //this creates a nice fade effect
   
-  if(minExhale == 0) {
+  if(minExhale == 0) {                                                                       //if the system hasn't been callibrated, use default mapping to display breathing data
     fill(map(stretch1, 0, 1025, 0, 100));
     ellipse(timer*5, height/2 + map(stretch1, 0 , 1025, 0 , 100), 10, 10);
   } else {
-    fill(map(stretch1, maxInhale, minExhale, 0, 100));
+    fill(map(stretch1, maxInhale, minExhale, 0, 100));                                       //if the callibration has finished, use it to better map the breathing data
     ellipse(timer*5, height/2 + map(stretch1, maxInhale , minExhale, 0 , 100), 10, 10);
   }
   
   
-  if (timer < 120) {
-    timer++;
-  } else {
-    timer = 0;
-  }
   
-  if (timer2 < 800) {
-    timer2++;
-  } else {
-    timer2 = 0;
-  }
+
   
   
   fill(255);
-  rect(width/2, 520, width, 150);
+  rect(width/2, 520, width, 150);                                                            //this prevents the text from looking weird by drawing over itself
   
   fill(0);
   text("Click when fully inhaled", width/2, 500);
   
-  if (inhaleClickTime == 2) {
+  if (inhaleClickTime == 2) {                                                                //has the max inhale data been recorded? Then tell the user to exhale
     fill(255);
     rect(width/2, 520, width, 150);
   
     fill(0);
     text("Click when fully exhaled", width/2, 500);
   }
-  if (exhaleClickTime == 2 && maxInhale <= minExhale) {
+  if (exhaleClickTime == 2 && maxInhale <= minExhale) {                                      //if the max and min inhale/exhale data has been recorded and looks legit, tell the user
     fill(255);
     rect(width/2, 520, width, 150);
   
@@ -153,8 +155,9 @@ void callibration () {
     textFont(font, 20);
     text("Callibration Complete. Min: " + maxInhale + " Max: " + minExhale, width/2, 500);
     timer2 = 0;
+    mode = 2;
 
-  } else if (exhaleClickTime == 2 && maxInhale > minExhale) {
+  } else if (exhaleClickTime == 2 && maxInhale > minExhale) {                                //otherwise, restart callibration
     
     fill(255);
     rect(width/2, 520, width, 150);
@@ -169,22 +172,32 @@ void callibration () {
     
   }
   
-  if (changeModeSoon == true && timer2 > 700) {
+  if (changeModeSoon == true && timer2 > 700) {                                              //this isn't really used for now, but it would give the user time to look at how the callibration has mapped their breathing data
       mode = 2;
   }
 }
 
-void excersize () {
-  baseNote = int(map(mouseX, 0, 600, 40, 70));
+//next page
+
+void exercise () {
+  //baseNote = int(map(stretch1, 0, 600, 40, 70));                                                  
+  //background(200, 50, 50, 10);
   
-  background(200, 50, 50);
+  fill(map(stretch1, maxInhale, minExhale, 0, 100));                                                          //below is some code visualizing the mapped stretch sensor data with colour and movement
+  ellipse(timer*5, height/2 + map(stretch1, maxInhale , minExhale, 0 , 100), 50, 50);
+  fill(200, 50, 50);
+  ellipse(timer*5, height-height/3 + map(stretch2, a2 , b2, 0 , 50), 10, 10);
+  stroke(255);
+  line(timer*5, height/2 + map(stretch1, maxInhale , minExhale, 0 , 100), timer*5, height-height/3 + map(stretch2, a2 , b2, 0 , 50));
+  noStroke();
   
-    if(random(rand1) > rand2) {
+  
+    if(random(rand1) > rand2) {                        //a base note has a chance of playing. Its pitch is dependant on sensor data
    sc.playNote(baseNote, 80, 2.0);
-   delay(int(map(mouseY, 0, 600, 200, 500)));
+   delay(int(map(mouseY, 0, 600, 200, 500)));          //the spaces between notes are also dependant on sensor data
    }
    
-   if(random(rand1) > rand2) {
+   if(random(rand1) > rand2) {                         //the following code creates dependant notes. If "noteMod" is 0, the relationships between the notes will be harmonious. When noteMod increases, interesting things start to happen
    
    sc2.playNote(baseNote+2+noteMod, 80, 2.0);
    delay(int(map(mouseY, 0, 600, 200, 500)));
@@ -201,7 +214,9 @@ void excersize () {
    }
 }
 
-void startMode () {
+//next page
+
+void startMode () {                                                                //this is the first thing that the user sees
   
   background(255);
   
@@ -214,7 +229,7 @@ void startMode () {
   textFont(font, 50);
   text("Click to calibrate", width/2, height/2);
 
-  if (mouseX > 100 && mouseX < 500 && mouseY > 200 && mouseY < 400) {
+  if (mouseX > 100 && mouseX < 500 && mouseY > 200 && mouseY < 400) {              //a visual indication that the user can click on the text to callibrate
     fill(100, 200, 100);
     rectMode(CENTER);
     rect(width/2, height/2 - 15, 500, 100);
