@@ -1,0 +1,229 @@
+ /*
+Accordion Lungs - Processing (Final)
+Sophia Niergarth
+Physical Computing
+OCAD University
+8 April 2015
+
+Based on:
+Bing, Andrew R. Brown , http://explodingart.com/soundcipher/tutes/bing/bing_tute.html
+Process Hack for Firmata, Paul Badger, http://playground.arduino.cc/Interfacing/ProcesssHackForFirmata
+
+*/
+
+PFont font = createFont("Arial", 16, true);
+boolean clicked = false;
+int mode;
+int timer;
+int timer2;
+boolean changeModeSoon = false;
+
+int inhaleClickTime;
+int maxInhale;
+int exhaleClickTime;
+int minExhale;
+
+import arb.soundcipher.*;
+SoundCipher sc = new SoundCipher(this);
+SoundCipher sc2 = new SoundCipher(this);
+SoundCipher sc3 = new SoundCipher(this);
+SoundCipher sc4 = new SoundCipher(this);
+
+int baseNote;
+int noteMod = 0;
+
+int rand1 = 5;
+int rand2 = 0;
+
+//% of random = rand2 / rand1
+
+import processing.serial.*;
+import cc.arduino.*;
+Arduino arduino;
+
+float stretch1;
+
+void setup () {
+  size(600, 600);
+  noStroke();
+  
+  arduino = new Arduino(this, Arduino.list()[4], 57600);
+  
+  arduino.pinMode(0, Arduino.INPUT);
+}
+
+void draw () {
+  
+  stretch1 = arduino.analogRead(0);
+  println(stretch1);
+  baseNote = int(map(mouseX, 0, 600, 40, 70));
+    
+  if (mode == 0) {
+    startMode();
+  }
+  if (mode == 1) {
+    callibration();
+  }
+  if (mode == 2) {
+    excersize();
+  }
+  
+  
+}
+
+void mouseClicked () {
+  if (mouseX > 100 && mouseX < 500 && mouseY > 200 && mouseY < 400) {
+    clicked = true;
+    mode = 1;
+  }
+  
+  if (mode == 1 && inhaleClickTime == 0) {
+    inhaleClickTime ++;
+  } else if (mode == 1 && inhaleClickTime == 1) {
+    println("yes");
+    inhaleClickTime = 2;
+    maxInhale = int(stretch1);
+    println(maxInhale);
+  }
+  if (mode == 1 && inhaleClickTime == 2 && exhaleClickTime == 0) {
+    exhaleClickTime ++;
+  } else if (mode == 1 && exhaleClickTime == 1) {
+    exhaleClickTime = 2;
+    minExhale = int(stretch1);
+    println("max is" + minExhale);
+  }
+  
+  if (mode == 1 && exhaleClickTime == 2 && maxInhale < minExhale) {
+    changeModeSoon = true;
+    //mode = 2;
+  }
+  
+  if (changeModeSoon == true) {
+   mode = 2; 
+  }
+  
+}
+
+void callibration () {
+  
+  //background(255,10);
+  fill(255, 10);
+  rect(width/2, height/2, width, height);
+  
+  if(minExhale == 0) {
+    fill(map(stretch1, 0, 1025, 0, 100));
+    ellipse(timer*5, height/2 + map(stretch1, 0 , 1025, 0 , 100), 10, 10);
+  } else {
+    fill(map(stretch1, maxInhale, minExhale, 0, 100));
+    ellipse(timer*5, height/2 + map(stretch1, maxInhale , minExhale, 0 , 100), 10, 10);
+  }
+  
+  
+  if (timer < 120) {
+    timer++;
+  } else {
+    timer = 0;
+  }
+  
+  if (timer2 < 800) {
+    timer2++;
+  } else {
+    timer2 = 0;
+  }
+  
+  
+  fill(255);
+  rect(width/2, 520, width, 150);
+  
+  fill(0);
+  text("Click when fully inhaled", width/2, 500);
+  
+  if (inhaleClickTime == 2) {
+    fill(255);
+    rect(width/2, 520, width, 150);
+  
+    fill(0);
+    text("Click when fully exhaled", width/2, 500);
+  }
+  if (exhaleClickTime == 2 && maxInhale <= minExhale) {
+    fill(255);
+    rect(width/2, 520, width, 150);
+  
+    fill(0);
+    textFont(font, 20);
+    text("Callibration Complete. Min: " + maxInhale + " Max: " + minExhale, width/2, 500);
+    timer2 = 0;
+
+  } else if (exhaleClickTime == 2 && maxInhale > minExhale) {
+    
+    fill(255);
+    rect(width/2, 520, width, 150);
+  
+    fill(0);
+    textFont(font, 50);
+    text("Callibration failed", width/2, 500);
+    delay(600);
+    inhaleClickTime = 0;
+    exhaleClickTime = 0;
+    
+    
+  }
+  
+  if (changeModeSoon == true && timer2 > 700) {
+      mode = 2;
+  }
+}
+
+void excersize () {
+  baseNote = int(map(mouseX, 0, 600, 40, 70));
+  
+  background(200, 50, 50);
+  
+    if(random(rand1) > rand2) {
+   sc.playNote(baseNote, 80, 2.0);
+   delay(int(map(mouseY, 0, 600, 200, 500)));
+   }
+   
+   if(random(rand1) > rand2) {
+   
+   sc2.playNote(baseNote+2+noteMod, 80, 2.0);
+   delay(int(map(mouseY, 0, 600, 200, 500)));
+   }
+   
+   if(random(rand1) > rand2) {
+   sc3.playNote(baseNote+4+noteMod, 80, 2.0);
+   delay(int(map(mouseY, 0, 600, 200, 500)));
+   }
+   
+   if(random(rand1) > rand2) {
+   sc4.playNote(baseNote+7+noteMod, 80, 2.0); 
+   delay(int(map(mouseY, 0, 600, 200, 500)));
+   }
+}
+
+void startMode () {
+  
+  background(255);
+  
+  fill(200, 100, 100);
+  rectMode(CENTER);
+  rect(width/2, height/2 - 15, 500, 100);
+  
+  fill(0);
+  textAlign(CENTER);
+  textFont(font, 50);
+  text("Click to calibrate", width/2, height/2);
+
+  if (mouseX > 100 && mouseX < 500 && mouseY > 200 && mouseY < 400) {
+    fill(100, 200, 100);
+    rectMode(CENTER);
+    rect(width/2, height/2 - 15, 500, 100);
+  
+    fill(0);
+    textAlign(CENTER);
+    textFont(font, 50);
+    text("Click to calibrate", width/2, height/2);
+    
+  }
+  
+}
